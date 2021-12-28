@@ -7,8 +7,8 @@ Created on Tue Dec 28 12:49:35 2021
 
 import requests
 import os, os.path
-# import librosa
-# import soundfile as sf
+import librosa
+import soundfile as sf
 
 from SyntheticAudioGenerator.ServiceWrapper import ServiceWrapperInterface
 
@@ -34,7 +34,7 @@ class ReplicaWrapper(ServiceWrapperInterface):
 
         self.api_token = auth_token
 
-    def generateAudio(self, output_folder, sentence):
+    def generate_audio(self, output_folder, sentence):
         replica_results = []
         total_dur = 0
 
@@ -57,9 +57,11 @@ class ReplicaWrapper(ServiceWrapperInterface):
 
         print("\nTotal elapsed time: " + str(total_dur) + " seconds")
 
-        self.saveAudio(output_folder, replica_results)
+        filename, filesize = self.save_audio(output_folder, replica_results)
+        
+        return res, filename, filesize
 
-    def saveAudio(self, output_folder, replica_results):
+    def save_audio(self, output_folder, replica_results):
         id = len(os.listdir(output_folder)) # unique id starts at next value in sequence
         successes = 0
 
@@ -79,14 +81,14 @@ class ReplicaWrapper(ServiceWrapperInterface):
                     continue
 
                 # resample audio to 16k hz
-                # try:
-                #     x, sr = librosa.load(audio_file, sr=22050)
-                #     y = librosa.resample(x, 22050, 16000)
-                #     sf.write(audio_file, y, 16000, subtype='PCM_16')
-                #     successes += 1
-                # except:
-                #     print("Could not resample audio file " + audio_file)
-                #     continue
+                try:
+                    x, sr = librosa.load(audio_file, sr=22050)
+                    y = librosa.resample(x, 22050, 16000)
+                    sf.write(audio_file, y, 16000, subtype='PCM_16')
+                    successes += 1
+                except:
+                    print("Could not resample audio file " + audio_file)
+                    continue
 
                 print("Saved to file: " + audio_file + "\n")
                 id += 1
@@ -94,3 +96,5 @@ class ReplicaWrapper(ServiceWrapperInterface):
                 print("Could not save file " + audio_file + " - check audio generation for errors" + "\n")
 
         print("Generated and saved " + str(successes) + " of " + str(len(replica_results)) + " audio files")
+
+        return audio_file, os.path.getsize(audio_file)

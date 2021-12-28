@@ -16,8 +16,8 @@ class ServiceWrapperInterface:
     def authenticate(self):
         pass
 
-    def generateAudio(self, output_folder, sentence):
+    def generate_audio(self, output_folder, sentence):
         pass
 
-    def saveAudio(self, output_folder):
+    def save_audio(self, output_folder):
         pass
