@@ -3,17 +3,20 @@
 Created on Tue Dec 28 12:49:35 2021
 
 @author: Ryan Hurlbut
+@author: Jacob Bream
 """
 
 import requests
 import os, os.path
 import librosa
 import soundfile as sf
+import random
 
 from SyntheticAudioGenerator.ServiceWrapper import ServiceWrapperInterface
 
 
 class ReplicaWrapper(ServiceWrapperInterface):
+    voices_map = {} # maps voice uuid's to speaker names
 
     def authenticate(self):
         print("Enter Replica account information")
@@ -26,75 +29,82 @@ class ReplicaWrapper(ServiceWrapperInterface):
 
         # send auth request
         r = requests.post('https://api.replicastudios.com/auth', headers = headers, data = payload)
-        auth_token = r.json()['access_token']
-        refresh_token = r.json()['refresh_token']
+        auth_token = None
+        try:
+            auth_token = r.json()['access_token']
+            refresh_token = r.json()['refresh_token']
+        except:
+            print("Replica authentication failed")
+            return False
 
         print("Replica auth_token: " + auth_token)
         print("Replica refresh_token: " + refresh_token + "\n")
 
         self.api_token = auth_token
+        return True
+
+    def get_voices(self):
+        headers = {
+            'Authorization': 'Bearer ' + self.api_token
+        }
+
+        r = requests.get('https://api.replicastudios.com/voice', headers = headers)
+
+        for voice in r.json():
+            self.voices.append(voice["uuid"])
+            self.voices_map[voice["uuid"]] = voice["name"]
+
+        print("Got " + str(len(self.voices)) + " voices from Replica\n")
 
     def generate_audio(self, output_folder, sentence):
-        replica_results = []
-        total_dur = 0
+        voice_id = self.voices[random.randint(0, len(self.voices) - 1)]
 
-        for voice_id in self.voices[:2]:
-            headers = {
-                'Authorization': 'Bearer ' + self.api_token
-            }
-            # send audio generation request to replica
-            r = requests.get('https://api.replicastudios.com/speech', params={
-                'txt': sentence,  'speaker_id': voice_id
-            }, headers = headers)
+        headers = {
+            'Authorization': 'Bearer ' + self.api_token
+        }
+        # send audio generation request to replica
+        r = requests.get('https://api.replicastudios.com/speech', params={
+            'txt': sentence,  'speaker_id': voice_id
+        }, headers = headers)
 
-            res = r.json()
-            replica_results.append(res) 
+        res = r.json()
 
-            if not "error_code" in res.keys():
-                total_dur += res["duration"]
-            
-            print("Elapsed time: " + str("{:<12.2f}".format(total_dur)) + " " + str(res))
+        if "error_code" not in res.keys():
+            print("Successfully generated Replica audio file in " + str("{:.2f}".format(res["duration"])) + " seconds")
+        else:
+            print("Error generating Replica audio file: " + res["error_code"] + " - " + res["error"])
 
-        print("\nTotal elapsed time: " + str(total_dur) + " seconds")
-
-        filename, filesize = self.save_audio(output_folder, replica_results)
+        filename, filesize = self.save_audio(output_folder, res, self.voices_map[voice_id])
         
         return res, filename, filesize
 
-    def save_audio(self, output_folder, replica_results):
+    def save_audio(self, output_folder, res, voice):
         id = len(os.listdir(output_folder)) # unique id starts at next value in sequence
-        successes = 0
+        audio_file = output_folder + "replica_" + voice + "_" + str(id) + ".wav"
+        link = res["url"]
 
-        for res in replica_results:
-            link = res["url"]
-            if not "error_code" in res.keys():
-                # download audio file in 22050 hz
-                audio_file = output_folder + "replica_" + self.voices[0] + "_" + str(id) + ".wav"
-                resp = requests.get(link, allow_redirects=True)
-                print("Attempted to download audio file - " + str(resp.status_code) + " " + resp.reason)
+        if "error_code" not in res.keys():
+            # download audio file in 22050 hz
+            resp = requests.get(link, allow_redirects=True)
+            print("Attempted to download Replica audio file - " + str(resp.status_code) + " " + resp.reason)
 
-                # save audio file
-                try:
-                    open(audio_file, 'wb').write(resp.content)
-                except:
-                    print("Could not save file " + audio_file + "\n")
-                    continue
+            # save audio file
+            try:
+                open(audio_file, 'wb').write(resp.content)
+            except:
+                print("Could not save file " + audio_file + "\n")
 
-                # resample audio to 16k hz
-                try:
-                    x, sr = librosa.load(audio_file, sr=22050)
-                    y = librosa.resample(x, 22050, 16000)
-                    sf.write(audio_file, y, 16000, subtype='PCM_16')
-                    successes += 1
-                except:
-                    print("Could not resample audio file " + audio_file)
-                    continue
+            # resample audio to 16k hz
+            try:
+                x, sr = librosa.load(audio_file, sr=22050)
+                y = librosa.resample(x, 22050, 16000)
+                sf.write(audio_file, y, 16000, subtype='PCM_16')
+            except:
+                print("Could not resample audio file " + audio_file)
 
-                print("Saved to file: " + audio_file + "\n")
-                id += 1
-            else:
-                print("Could not save file " + audio_file + " - check audio generation for errors" + "\n")
-
-        print("Generated and saved " + str(successes) + " of " + str(len(replica_results)) + " audio files")
+            print("Saved to file: " + audio_file + "\n")
+            id += 1
+        else:
+            print("Could not save file " + audio_file + " - check audio generation for errors" + "\n")
 
         return audio_file, os.path.getsize(audio_file)
