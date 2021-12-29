@@ -11,6 +11,7 @@ class APIWrapper:
     api_token = None
     voices = []
     num_voices = 0
+    service_name = ""
 
     """Constructor for API wrapper classes.
         This method must be implemented vy all API wrapper sub-classes.

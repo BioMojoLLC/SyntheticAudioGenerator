@@ -11,19 +11,20 @@ import os, os.path
 import librosa
 import soundfile as sf
 
-from APIWrapper import APIWrapper
+from .APIWrapper import APIWrapper
 
 
 class ReplicaWrapper(APIWrapper):
     voices_map = {}  # maps voice uuid's to speaker names
 
     def __init__(self):
-        if self.authenticate() and self.get_voices():
+        self.service_name = "Replica API"
+        if self.__authenticate() and self.__get_voices():
             print("Replica initialization successful\n")
         else:
             raise Exception("Replica failed to initialize\n")
 
-    def authenticate(self):
+    def __authenticate(self):
         print("Enter Replica account information")
         user_id = input("username: ")
         password = input("password: ")
@@ -69,7 +70,7 @@ class ReplicaWrapper(APIWrapper):
             self.api_token = auth_token
             return True
 
-    def get_voices(self):
+    def __get_voices(self):
         headers = {"Authorization": "Bearer " + self.api_token}
 
         r = requests.get("https://api.replicastudios.com/voice", headers=headers)
@@ -125,7 +126,7 @@ class ReplicaWrapper(APIWrapper):
                     + " seconds"
                 )
             try:
-                filename, filesize = self.save_audio(
+                filename, filesize = self.__save_audio(
                     output_folder, res, self.voices_map[voice], clip_id
                 )
                 return res, filename, filesize
@@ -133,7 +134,7 @@ class ReplicaWrapper(APIWrapper):
                 print(str(e))
                 return 400, None, None
 
-    def save_audio(self, output_folder, res, voice, clip_id):
+    def __save_audio(self, output_folder, res, voice, clip_id):
         audio_file = output_folder + "replica_" + voice + "_" + str(clip_id) + ".wav"
         link = res["url"]
 
@@ -141,7 +142,7 @@ class ReplicaWrapper(APIWrapper):
         resp = requests.get(link, allow_redirects=True)
         if resp.status_code != 200:
             raise Exception(
-                "Coud not download Replica audio file - "
+                "Could not download Replica audio file - "
                 + str(resp.status_code)
                 + " "
                 + resp.reason
