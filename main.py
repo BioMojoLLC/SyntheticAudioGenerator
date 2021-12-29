@@ -58,27 +58,37 @@ if __name__ == '__main__':
     term_q = deque(keywords)
     term_bytes = {kw:0 for kw in keywords}
     api_q = deque(apis)
+    # while we can still make data, and we haven't made all of our target data
     while len(term_q) and len(api_q):
-        term = term_q.pop_left()
         api = api_q.pop_left()
-        sentence = sentences[term].pop_left()
-        sentences[term].append(sentence)
-        
-        resp, filename, size = api.generate_audio(text_dir, sentence) 
-        if resp == 200:
-            out_data.append([filename, size, sentence])
-            term_bytes[term] += size
-            api_q.append(api) # only add api back if we had a success
-        else:
-            pass # May do something later
+        api_q.append(api)
+        # Use all the voices in an api once
+        for _ in range(api.num_voices):
+            # Cut the loop if we hit data targets for all terms.
+            if not len(term_q):
+                break
+            term = term_q.pop_left()
+            print("API:", api.name, ", Term:", term)
+            sentence = sentences[term].pop_left()
+            sentences[term].append(sentence)
             
-        if bytes_to_mins(term_bytes[term]) < minutes_per_term:
-            term_q.append(term)
-        
-        # Randomly offset the terms, this will ensure each term does not get used by the same api repeatedly. 
+            resp, filename, size = api.generate_audio(text_dir, sentence) 
+            if resp == 200:
+                out_data.append([filename, size, sentence])
+                term_bytes[term] += size
+            else:
+                api_q.remove(api)
+                print("Error:", resp, ", Removing", api.name, "from api queue")
+                
+            # Add term to the queue if we still need more data for it
+            if bytes_to_mins(term_bytes[term]) < minutes_per_term:
+                term_q.append(term)
+            
+        # Randomly offset the terms, after using an api, 
+        # this will ensure each term does not get used by the same api repeatedly. 
         if random.getrandbits(1):
-            term_q.append(term_q.pop_left)
-    
+            term_q.append(term_q.pop_left)    
+        
     for t, b in term_bytes:
         print(b, "Bytes made for term:", t)
         
