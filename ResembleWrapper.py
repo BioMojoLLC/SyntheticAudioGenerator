@@ -10,10 +10,11 @@ from APIWrapper import APIWrapper
 import requests
 import datetime
 import time
+import os
 
 class ResembleWrapper(APIWrapper):
     def __init__(self):
-        self.voices = ['aaron','584fae8e', 'aiden', 'scarlet', 'sophia', 'elijah']
+        self.voices = ['584fae8e', 'aaron', 'aiden', 'scarlet', 'sophia', 'elijah']
         self.service_name = 'Resemble'
         self.__authenticate()
         self.__new_project()
@@ -44,7 +45,7 @@ class ResembleWrapper(APIWrapper):
     def generate_audio(self, audio_dir: str, sentence: str, voice: str, clip_id: int()) -> tuple([int, str, int]):
         # Switch to False if the request was a success 
 
-        clip_title = f"{self.service_name}-{voice}-{clip_id}"
+        clip_title = f"{self.service_name}-{voice}-{clip_id}.wav"
         # POST the clip, sometimes we need to keep trying
         # If at first you don't succeed, try, try again
         while True:
@@ -52,7 +53,7 @@ class ResembleWrapper(APIWrapper):
             post_headers = {'Authorization': f'Bearer {self.auth_token}', 'Content-Type': 'application/json'}
             data = {
                 'data' : {"title": clip_title,
-                          "body": f"<speak><p>{sentence}</p></speak>",
+                          "body": f"<speak><p><prosody rate='75%'>{sentence}</prosody></p></speak>",
                           "voice" : f"{voice}"
                           } ,
                 'precision' : "PCM_16",
@@ -61,7 +62,7 @@ class ResembleWrapper(APIWrapper):
             post_response = requests.post(post_url, headers=post_headers, json=data)
             status = post_response.status_code
             if (status == 200):
-                print(clip_title, "Created")
+                print("Created", clip_title)
                 break
             elif (status == 429):
                 print("Resemble timed you out, waiting 2 seconds")
@@ -97,10 +98,12 @@ class ResembleWrapper(APIWrapper):
         link = get_response.json()['link'] 
         resp = requests.get(link, allow_redirects=True)
         status = resp.status_code
+        clip_path = os.path.join(audio_dir, clip_title)
         if resp.status_code == 200:
             open(audio_dir + clip_title + ".wav", 'wb').write(resp.content)
-            print(clip_title, "Saved")
-            return 200, audio_dir + clip_title, resp.headers['content-length']
+            size = int(resp.headers['content-length'])
+            print("Saved", clip_title, "\nsize: ", size)
+            return 200, clip_path, size
         else:
             print("Unable to download from link:", link)
             print("Error:", status)

@@ -15,7 +15,7 @@ def prep_text(text_dir, keywords:[]) -> dict:
             A dictionary with keywords as the key, and a list of sentences as the value
     """
     sentences = {kw:[] for kw in keywords}
-    text_files = os.listdir(text_dir)
+    text_files = [filename for filename in os.listdir(text_dir) if filename.endswith(".txt")]
     for filename in text_files:
         print('Reading ---',  filename)
         contents = []
@@ -27,4 +27,5 @@ def prep_text(text_dir, keywords:[]) -> dict:
                 if ' ' + kw + ' ' in line:
                     sentences[kw].append(line)
                     break # no need to continue, we found a matching line of text
+    return sentences
     
