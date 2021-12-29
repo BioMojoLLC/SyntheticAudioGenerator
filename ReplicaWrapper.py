@@ -18,11 +18,10 @@ class ReplicaWrapper(APIWrapper):
     voices_map = {}  # maps voice uuid's to speaker names
 
     def __init__(self):
-        if self.authenticate():
-            if self.get_voices():
-                print("Replica initialization successful\n")
-            else:
-                print("Replica failed to initialize\n")
+        if self.authenticate() and self.get_voices():
+            print("Replica initialization successful\n")
+        else:
+            raise Exception("Replica failed to initialize\n")
 
     def authenticate(self):
         print("Enter Replica account information")
@@ -37,6 +36,22 @@ class ReplicaWrapper(APIWrapper):
         r = requests.post(
             "https://api.replicastudios.com/auth", headers=headers, data=payload
         )
+
+        failed_attempts = 0
+        while (r.status_code == 401 or r.status_code == 403) and failed_attempts < 3:
+            failed_attempts += 1
+            print("Invalid credentials, try again")
+            user_id = input("username: ")
+            password = input("password: ")
+            print()
+            # send auth request
+            r = requests.post(
+                "https://api.replicastudios.com/auth", headers=headers, data=payload
+            )
+
+        if failed_attempts == 3:
+            print("Could not vaildate Replica account")
+            return False
 
         if r.status_code != 200:
             print(
