@@ -6,13 +6,14 @@ Created on Tue Dec 28 12:49:10 2021
 @author: Jacob Bream
 """
 
-class ServiceWrapperInterface:
+class ServiceWrapper:
     api_token = None
     voices = []
 
     """Constructor for Service classes. Authenticates the service and then populates voices with the available voices.
     """
     def __init__(self):
+        print("A")
         if self.authenticate():
             self.get_voices()
 

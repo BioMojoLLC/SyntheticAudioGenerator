@@ -58,21 +58,24 @@ if __name__ == '__main__':
     term_q = deque(keywords)
     term_bytes = {kw:0 for kw in keywords}
     api_q = deque(apis)
+    
     # while we can still make data, and we haven't made all of our target data
     while len(term_q) and len(api_q):
         api = api_q.pop_left()
         api_q.append(api)
-        # Use all the voices in an api once
-        for _ in range(api.num_voices):
+        
+        for voice in api.voices:
+            
             # Cut the loop if we hit data targets for all terms.
             if not len(term_q):
                 break
+            
             term = term_q.pop_left()
-            print("API:", api.name, ", Term:", term)
             sentence = sentences[term].pop_left()
             sentences[term].append(sentence)
             
-            resp, filename, size = api.generate_audio(text_dir, sentence) 
+            print("API:", api.name, ", Term:", term, "Voice:", voice)
+            resp, filename, size = api.generate_audio(text_dir, sentence, voice) 
             if resp == 200:
                 out_data.append([filename, size, sentence])
                 term_bytes[term] += size
