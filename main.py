@@ -31,8 +31,9 @@ def bytes_to_mins(byte_count : int) -> float:
     return byte_count / MIN_TO_BYTE
 
 if __name__ == '__main__':
+    
     sentences_per_term = 10
-    minutes_per_term = 3
+    minutes_per_term = .07
     
     with open(keyword_file, 'r') as file:
         keywords = file.read().splitlines()
@@ -55,9 +56,7 @@ if __name__ == '__main__':
         print("Found existing directory:")
         print(audio_dir)
     
-    # Clip id's start at the number of previous recordings made.
-    clip_id = len([name for name in os.listdir(audio_dir) if name.endswith(".wav")])
-    print("Starting generator at id: ", clip_id)
+
 
     print()
     print("Connecting to APIs")
@@ -65,11 +64,14 @@ if __name__ == '__main__':
     apis = []
     apis.append(ResembleWrapper())
     apis.append(ReplicaWrapper())
-        
-    out_data = []
     
+    
+    # Clip id's start at the number of previous recordings made.
+    clip_id = len([name for name in os.listdir(audio_dir) if name.endswith(".wav")])
+    print("Starting generator at id: ", clip_id)
     #%%
     # Convert terms, apis, and sentences for each term into queues.
+    out_data = []
     for k, v in sentences.items():
         sentences[k] = deque(v)
     term_q = deque(keywords)
@@ -102,24 +104,26 @@ if __name__ == '__main__':
                 api_q.remove(api)
                 print("API queue:", *[a.service_name for a in api_q], len(api_q))
                 break
-                
+            
             # Add term to the queue if we still need more data for it
             if bytes_to_mins(term_bytes[term]) < minutes_per_term:
-                print("Current total minutes for term:", term, bytes_to_mins(term_bytes(term)))
                 term_q.append(term)
+            else:
+                print("Removing \"", term, "\" from term queue")
             
         # Randomly offset the terms, after using an api. In the long run, 
         # this will ensure each term does not get used by the same api repeatedly. 
         if random.getrandbits(1) and len(term_q):
             term_q.append(term_q.popleft())    
     
-    print("Finished")
+    print("Finished\n")
     for t, b in term_bytes.items():
-        print("Made", round(bytes_to_mins(b),3), "minutes of audio for term:", t)
+        print("Made", round(bytes_to_mins(b),3), "minutes of audio for term:", t, "\n")
         
-    # with open(audio_dir + out_file, 'w', newline='' ) as file:
-    #     writer = csv.writer(file, delimeter=',')
-    #     writer.writerows(out_data)
+    print("Writing", len(out_data), "rows to data.csv\n")
+    with open(audio_dir + "data.csv", "a+", newline= "") as my_csv:
+        csvWriter = csv.writer(my_csv, delimiter=',')
+        csvWriter.writerows(out_data)
     
     for api in apis:
         api.cleanup()
