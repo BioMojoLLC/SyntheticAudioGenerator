@@ -121,7 +121,7 @@ class ResembleWrapper(APIWrapper):
         
         status = delete_res.status_code
         if status == 204:
-            print("Cleaned", self.servce_name)
+            print("Cleaned", self.service_name)
         elif status == 429:
             time.sleep(2) # Try again, we went too fast
         else:

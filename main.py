@@ -33,7 +33,7 @@ def bytes_to_mins(byte_count : int) -> float:
 if __name__ == '__main__':
     
     sentences_per_term = 10
-    minutes_per_term = .07
+    minutes_per_term = .05
     
     with open(keyword_file, 'r') as file:
         keywords = file.read().splitlines()
@@ -43,8 +43,9 @@ if __name__ == '__main__':
     
     # Print stats, pick a random selection from each list
     for k, v in sentences.items():
-        print("Sentences found for", k, ":", len(v))
-        sentences[k] = np.random.choice( v, sentences_per_term , replace=False)
+        n = len(v)
+        print("Sentences found for", k, ":", n)
+        sentences[k] = np.random.choice( v, min(sentences_per_term,n) , replace=False)
     
     print("Saving up to ", sentences_per_term, "sentences per term")
     print()
@@ -90,11 +91,15 @@ if __name__ == '__main__':
                 break
             
             term = term_q.popleft()
+            
+            
+                
             sentence = sentences[term].popleft()[:30] # TEMPORARY CUT OFF
             sentences[term].append(sentence)
             print()
             print("Making clip using:", api.service_name, ", for term:", term, "with voice:", voice)
-            res, filename, size = api.generate_audio(audio_dir, sentence, voice, clip_id) 
+            res, filename, size = api.generate_audio(audio_dir, sentence, voice, clip_id)
+            
             if res == 200:
                 out_data.append([filename, size, sentence])
                 term_bytes[term] += size
@@ -110,6 +115,7 @@ if __name__ == '__main__':
                 term_q.append(term)
             else:
                 print("Removing \"", term, "\" from term queue")
+                continue
             
         # Randomly offset the terms, after using an api. In the long run, 
         # this will ensure each term does not get used by the same api repeatedly. 
@@ -124,6 +130,6 @@ if __name__ == '__main__':
     with open(audio_dir + "data.csv", "a+", newline= "") as my_csv:
         csvWriter = csv.writer(my_csv, delimiter=',')
         csvWriter.writerows(out_data)
-    
+    #%%
     for api in apis:
         api.cleanup()
