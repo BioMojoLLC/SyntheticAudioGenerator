@@ -9,6 +9,7 @@ Created on Tue Dec 28 12:49:35 2021
 import random
 import os, os.path
 from google.cloud import texttospeech
+from settings import google_auth_key_path
 
 from APIWrapper import APIWrapper
 
@@ -24,9 +25,7 @@ class GoogleWrapper(APIWrapper):
             raise Exception("Google Cloud Text to Speech failed to initialize\n")
 
     def __authenticate(self):
-        os.environ[
-            "GOOGLE_APPLICATION_CREDENTIALS"
-        ] = "C:\\Users\\jrbre\\Documents\\Biomojo\\SyntheticAudioGenerator\\decent-blade-336618-e8742853d3d1.json"
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = google_auth_key_path
         try:
             self.client = texttospeech.TextToSpeechClient()
             return True
