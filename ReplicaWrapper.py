@@ -135,7 +135,8 @@ class ReplicaWrapper(APIWrapper):
                 return 400, None, None
 
     def __save_audio(self, output_folder, res, voice, clip_id):
-        audio_file = output_folder + "replica_" + voice + "_" + str(clip_id) + ".wav"
+        audio_file = "replica_" + voice + "_" + str(clip_id) + ".wav"
+        audio_path = output_folder + audio_file
         link = res["url"]
 
         # download audio file in 22050 hz
@@ -150,11 +151,11 @@ class ReplicaWrapper(APIWrapper):
         else:
             # save audio file
             try:
-                open(audio_file, "wb").write(resp.content)
+                open(audio_path, "wb").write(resp.content)
             except:
                 raise Exception("Could not save file " + audio_file + "\n")
 
-            dp.resample_file(audio_file, 22050, 16000, "PCM_16")
+            dp.resample_file(audio_path, 22050, 16000, "PCM_16")
 
             print("Saved to file: " + audio_file + "\n")
 

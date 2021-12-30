@@ -82,11 +82,12 @@ class GoogleWrapper(APIWrapper):
             return 400, None, None
 
     def __save_audio(self, output_folder, res, voice, clip_id):
-        audio_file = output_folder + "google_" + voice + "_" + str(clip_id) + ".wav"
+        audio_file = "replica_" + voice + "_" + str(clip_id) + ".wav"
+        audio_path = output_folder + audio_file
 
         # save audio file
         try:
-            with open(audio_file, "wb") as out:
+            with open(audio_path, "wb") as out:
                 out.write(res.audio_content)
                 print("Saved to file: " + audio_file + "\n")
         except:
