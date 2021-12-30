@@ -10,6 +10,8 @@ import random
 import os, os.path
 from google.cloud import texttospeech
 from settings import google_auth_key_path
+import soundfile as sf
+import data_processing as dp
 
 from APIWrapper import APIWrapper
 
@@ -28,9 +30,10 @@ class GoogleWrapper(APIWrapper):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = google_auth_key_path
         try:
             self.client = texttospeech.TextToSpeechClient()
+            print("Google Cloud Text to Speech successfully authorized")
             return True
         except:
-            print("Could not create Google client")
+            print("Error authorizing Google Cloud Text to Speech")
             return False
 
     def __get_voices(self):
@@ -65,19 +68,26 @@ class GoogleWrapper(APIWrapper):
             audio_encoding=texttospeech.AudioEncoding.LINEAR16
         )
 
-        res = self.client.synthesize_speech(
-            request={
-                "input": input_text,
-                "voice": voice_config,
-                "audio_config": audio_config,
-            }
-        )
-
         try:
-            filename, filesize = self.__save_audio(output_folder, res, voice, clip_id)
-            return res, filename, filesize
-        except Exception as e:
-            print(str(e))
+            res = self.client.synthesize_speech(
+                request={
+                    "input": input_text,
+                    "voice": voice_config,
+                    "audio_config": audio_config,
+                }
+            )
+            print("Successfully generated Google audio file")
+            try:
+                filename, filesize = self.__save_audio(
+                    output_folder, res, voice, clip_id
+                )
+                return 200, filename, filesize
+            except Exception as e:
+                print(str(e))
+                return 400, None, None
+
+        except Exception:
+            print("Error generating Google audio file")
             return 400, None, None
 
     def __save_audio(self, output_folder, res, voice, clip_id):
@@ -88,8 +98,10 @@ class GoogleWrapper(APIWrapper):
         try:
             with open(audio_path, "wb") as out:
                 out.write(res.audio_content)
-                print("Saved to file: " + audio_file + "\n")
+            data, samplerate = sf.read(audio_path)
+            dp.resample_file(audio_path, samplerate, 16000, "PCM_16")
         except:
             raise Exception("Could not save file " + audio_file + "\n")
 
+        print("Saved to file: " + audio_file + "\n")
         return audio_file, os.path.getsize(audio_path)
