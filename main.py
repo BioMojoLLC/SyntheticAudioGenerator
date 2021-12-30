@@ -64,14 +64,14 @@ if __name__ == '__main__':
     print("Connecting to APIs")
     # For now APIs are hardcoded in. 
     apis = []
-    apis.append(ResembleWrapper())
+    # apis.append(ResembleWrapper())
     apis.append(ReplicaWrapper())
     
     
     # Clip id's start at the number of previous recordings made.
     clip_id = len([name for name in os.listdir(audio_dir) if name.endswith(".wav")])
     print("Starting generator at id: ", clip_id)
-    #%%
+
     # Convert terms, apis, and sentences for each term into queues.
     out_data = []
     for k, v in sentences.items():
@@ -128,6 +128,6 @@ if __name__ == '__main__':
     with open(os.path.join(audio_dir, "data.csv"), "a+", newline= "") as my_csv:
         csvWriter = csv.writer(my_csv, delimiter=',')
         csvWriter.writerows(out_data)
-    #%%
+
     for api in apis:
         api.cleanup()

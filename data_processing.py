@@ -9,6 +9,7 @@ import os
 import librosa
 import soundfile as sf
 import re
+import random
 
 def load_text(text_dir, keywords: []) -> dict:
     """Loads text data from the text directory, and only keeps sentences associated
@@ -35,7 +36,7 @@ def load_text(text_dir, keywords: []) -> dict:
     return sentences
 
 
-def cut_sentence(input_string: str, keyword: str, target_ratio: float = 1/22) -> str:
+def cut_sentence(input_string: str, keyword: str, target_ratio: float = 1/17) -> str:
     """Cut the sentence to maintain the ratio : count(keyword) / word_count(sentence) 
     
     This function is case sensitive!
@@ -70,6 +71,13 @@ def cut_sentence(input_string: str, keyword: str, target_ratio: float = 1/22) ->
         s = s[int(max(0, first-(keep/2))): int(last+(keep/2)) + 1]
     return " ".join(s)
     
+def get_phonetic_sentence(sentence:str, phonetic_dict: dict) ->str:
+    for w, p_list in phonetic_dict.items():
+        p = random.choice(p_list)
+        sentence = sentence.replace(w, p)
+        
+    return sentence
+
 def resample_file(
     audio_path: str,
     old_sample_rate: int,
