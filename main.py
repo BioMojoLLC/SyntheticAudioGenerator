@@ -89,17 +89,16 @@ if __name__ == '__main__':
             # Cut the loop if we hit data targets for all terms.
             if not len(term_q):
                 break
-            
+
             term = term_q.popleft()
-            
-            
-                
+            term_q.append(term)
+
             sentence = sentences[term].popleft()[:30] # TEMPORARY CUT OFF
             sentences[term].append(sentence)
             print()
             print("Making clip using:", api.service_name, ", for term:", term, "with voice:", voice)
             res, filename, size = api.generate_audio(audio_dir, sentence, voice, clip_id)
-            
+
             if res == 200:
                 out_data.append([filename, size, sentence])
                 term_bytes[term] += size
@@ -109,13 +108,11 @@ if __name__ == '__main__':
                 api_q.remove(api)
                 print("API queue:", *[a.service_name for a in api_q], len(api_q))
                 break
-            
-            # Add term to the queue if we still need more data for it
-            if bytes_to_mins(term_bytes[term]) < minutes_per_term:
-                term_q.append(term)
-            else:
+
+            # Remove the term if we have hit the target for the term
+            if bytes_to_mins(term_bytes[term]) >= minutes_per_term:
                 print("Removing \"", term, "\" from term queue")
-                continue
+                term_q.remove(term)
             
         # Randomly offset the terms, after using an api. In the long run, 
         # this will ensure each term does not get used by the same api repeatedly. 
