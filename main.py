@@ -65,6 +65,7 @@ if __name__ == '__main__':
     apis = []
     apis.append(ResembleWrapper())
     apis.append(ReplicaWrapper())
+        
     out_data = []
     
     #%%
@@ -79,6 +80,7 @@ if __name__ == '__main__':
     while len(term_q) and len(api_q):
         api = api_q.popleft()
         api_q.append(api)
+        print("Switching to api:", api.service_name)
         
         for voice in api.voices:
             # Cut the loop if we hit data targets for all terms.
@@ -86,26 +88,29 @@ if __name__ == '__main__':
                 break
             
             term = term_q.popleft()
-            sentence = sentences[term].popleft()
+            sentence = sentences[term].popleft()[:30] # TEMPORARY CUT OFF
             sentences[term].append(sentence)
             print()
             print("Making clip using:", api.service_name, ", for term:", term, "with voice:", voice)
-            resp, filename, size = api.generate_audio(audio_dir, sentence, voice, clip_id) 
-            if resp == 200:
+            res, filename, size = api.generate_audio(audio_dir, sentence, voice, clip_id) 
+            if res == 200:
                 out_data.append([filename, size, sentence])
                 term_bytes[term] += size
                 clip_id += 1
             else:
+                print("Error:", res, ", Removing", api.service_name, "from api queue")
                 api_q.remove(api)
-                print("Error:", resp, ", Removing", api.name, "from api queue")
+                print("API queue:", *[a.service_name for a in api_q], len(api_q))
+                break
                 
             # Add term to the queue if we still need more data for it
             if bytes_to_mins(term_bytes[term]) < minutes_per_term:
+                print("Current total minutes for term:", term, bytes_to_mins(term_bytes(term)))
                 term_q.append(term)
             
         # Randomly offset the terms, after using an api. In the long run, 
         # this will ensure each term does not get used by the same api repeatedly. 
-        if len(term_q) and random.getrandbits(1):
+        if random.getrandbits(1) and len(term_q):
             term_q.append(term_q.popleft())    
     
     print("Finished")
@@ -115,3 +120,6 @@ if __name__ == '__main__':
     # with open(audio_dir + out_file, 'w', newline='' ) as file:
     #     writer = csv.writer(file, delimeter=',')
     #     writer.writerows(out_data)
+    
+    for api in apis:
+        api.cleanup()

@@ -6,7 +6,8 @@ Created on Tue Dec 28 12:49:35 2021
 @author: Jacob Bream
 """
 from settings import replica_username
-from settings import replica_password
+from settings import replica_pw
+
 import requests
 import os, os.path
 import librosa
@@ -28,7 +29,7 @@ class ReplicaWrapper(APIWrapper):
     def __authenticate(self):
         print("Enter Replica account information")
         user_id = replica_username
-        password = replica_password
+        password = replica_pw
         # user_id = input("username: ")
         # password = input("password: ")
         print()
@@ -132,9 +133,9 @@ class ReplicaWrapper(APIWrapper):
                 filename, filesize = self.__save_audio(
                     output_folder, res, self.voices_map[voice], clip_id
                 )
-                return res, filename, filesize
+                return 200, filename, filesize
             except Exception as e:
-                print(str(e))
+                print("Exception while saving audio file:", res, str(e))
                 return 400, None, None
 
     def __save_audio(self, output_folder, res, voice, clip_id):
@@ -168,3 +169,6 @@ class ReplicaWrapper(APIWrapper):
             print("Saved to file: " + audio_file + "\n")
 
             return audio_file, os.path.getsize(audio_file)
+
+    def cleanup():
+        pass

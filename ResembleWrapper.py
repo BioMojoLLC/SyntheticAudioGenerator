@@ -70,7 +70,7 @@ class ResembleWrapper(APIWrapper):
                 time.sleep(2)
             else:
                 print("Error:", status, " ocurred, please check the Resemble.ai documentation.")
-                return (status, "", 0)
+                return status, None, None
          
         # Get clip link with GET request
         while True:
@@ -93,7 +93,7 @@ class ResembleWrapper(APIWrapper):
             else:
                 print("Resemble generated a clip, but I can't get the link")
                 print("Error:", status, " ocurred, please check the Resemble.ai documentation.")
-                return (status, "", 0)
+                return status, None, None
                 
         # Download/ write file, this doesn't use the Resemble API
         link = get_response.json()['link'] 
@@ -108,4 +108,21 @@ class ResembleWrapper(APIWrapper):
         else:
             print("Unable to download from link:", link)
             print("Error:", status)
-            return (status, "", 0)
+            return status, None, None
+    
+    def cleanup(self):
+        delete_url =  f'https://app.resemble.ai/api/v1/projects/{self.project_uuid}'
+        headers = {
+          'Authorization': 'Token token=' + self.auth_token,
+          'Content-Type': 'application/json'
+        }
+        delete_res = requests.delete(delete_url, headers=headers)
+        
+        status = delete_res.status_code
+        if status == 200:
+            print("Resemble project Cleaned")
+            return
+        elif status == 429:
+            time.sleep(2) # Try again, we went too fast
+        else:
+            print("Error while cleaning up Resemble:", status)
