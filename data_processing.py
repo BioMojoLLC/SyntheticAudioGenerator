@@ -8,7 +8,7 @@ Created on Tue Dec 28 13:39:27 2021
 import os
 import librosa
 import soundfile as sf
-
+import re
 
 def load_text(text_dir, keywords: []) -> dict:
     """Loads text data from the text directory, and only keeps sentences associated
@@ -35,18 +35,41 @@ def load_text(text_dir, keywords: []) -> dict:
     return sentences
 
 
-def cut_sentence(sentence: str, keyword: str, ratio: float = 0.05) -> str:
-    """Cut the sentence to maintain the ratio : count(keyword) / word_count(sentence)
-
-    The default ratio is 1 key word for every 20 words.
-
+def cut_sentence(input_string: str, keyword: str, target_ratio: float = 1/22) -> str:
+    """Cut the sentence to maintain the ratio : count(keyword) / word_count(sentence) 
+    
+    This function is case sensitive!
+    
+    input_string 
+        the input string to cut down the wordcount of
+    
+    keyword
+        the word to leave buffer words in front of and behind
+    
+    target_ratio
+        must be between 0 and 1, the ratio used to determine how many words to keep, related to how many 
+        ocurrances of the keyword there are
+        
     RETURNS
-        The cut sentence as a string, if the sentence has a ratio of number of keywords to total words
-        that is greater than the given ratio, the returned sentence will be exactly at the given ratio.
+        The cut sentence as a string. If the sentence is already at the target ratio,
+        the unchanged input is returned
     """
-    pass
-
-
+    s = input_string.split(' ')
+    l = len(s)
+    count = sum(1 for _ in re.finditer(r'\b%s\b' % re.escape(keyword), input_string))
+    if not count:
+        return input_string
+    r = count/l
+    if r < target_ratio:
+        target_count = count * (1/target_ratio)
+        key_indeces = [i for i in range(l) if s[i] == keyword]
+        first = key_indeces[0]
+        last = key_indeces[-1]
+        num_between = last - first + 1
+        keep = target_count - num_between
+        s = s[int(max(0, first-(keep/2))): int(last+(keep/2)) + 1]
+    return " ".join(s)
+    
 def resample_file(
     audio_path: str,
     old_sample_rate: int,

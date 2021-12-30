@@ -11,7 +11,8 @@ from settings import text_dir
 from settings import keyword_file
 from settings import out_file
 
-from data_processing import load_text
+
+from data_processing import load_text, cut_sentence
 
 import os
 import numpy as np
@@ -33,7 +34,7 @@ def bytes_to_mins(byte_count : int) -> float:
 if __name__ == '__main__':
     
     sentences_per_term = 10
-    minutes_per_term = .05
+    minutes_per_term = .04
     
     with open(keyword_file, 'r') as file:
         keywords = file.read().splitlines()
@@ -45,8 +46,10 @@ if __name__ == '__main__':
     for k, v in sentences.items():
         n = len(v)
         print("Sentences found for", k, ":", n)
-        sentences[k] = np.random.choice( v, min(sentences_per_term,n) , replace=False)
-    
+        v = np.random.choice( v, min(sentences_per_term,n) , replace=False)
+        v = [cut_sentence(s, k) for s in v]
+        sentences[k] = v
+        
     print("Saving up to ", sentences_per_term, "sentences per term")
     print()
     
@@ -57,8 +60,6 @@ if __name__ == '__main__':
         print("Found existing directory:")
         print(audio_dir)
     
-
-
     print()
     print("Connecting to APIs")
     # For now APIs are hardcoded in. 
@@ -93,7 +94,7 @@ if __name__ == '__main__':
             term = term_q.popleft()
             term_q.append(term)
 
-            sentence = sentences[term].popleft()[:30] # TEMPORARY CUT OFF
+            sentence = sentences[term].popleft()
             sentences[term].append(sentence)
             print()
             print("Making clip using:", api.service_name, ", for term:", term, "with voice:", voice)
@@ -124,7 +125,7 @@ if __name__ == '__main__':
         print("Made", round(bytes_to_mins(b),3), "minutes of audio for term:", t, "\n")
         
     print("Writing", len(out_data), "rows to data.csv\n")
-    with open(audio_dir + "data.csv", "a+", newline= "") as my_csv:
+    with open(os.path.join(audio_dir, "data.csv"), "a+", newline= "") as my_csv:
         csvWriter = csv.writer(my_csv, delimiter=',')
         csvWriter.writerows(out_data)
     #%%
