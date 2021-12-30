@@ -5,9 +5,10 @@
 4) Run the program
 
 """
-resemble_api_token=""
-replica_username=""
-replica_password=""
+resemble_api_token = ""
+replica_username = ""
+replica_password = ""
+google_auth_key_path = ""
 
 # These following items need to be removed at some point
 audio_dir = ""
