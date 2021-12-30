@@ -63,8 +63,10 @@ if __name__ == '__main__':
     # For now APIs are hardcoded in. 
     apis = []
     apis.append(ResembleWrapper())
-    # apis.append(ReplicaWrapper())
+    apis.append(ReplicaWrapper())
     out_data = []
+    
+    #%%
     # Convert terms, apis, and sentences for each term into queues.
     for k, v in sentences.items():
         sentences[k] = deque(v)

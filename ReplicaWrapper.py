@@ -11,7 +11,7 @@ import os, os.path
 import librosa
 import soundfile as sf
 
-from .APIWrapper import APIWrapper
+from APIWrapper import APIWrapper
 
 
 class ReplicaWrapper(APIWrapper):
