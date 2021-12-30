@@ -7,7 +7,7 @@ Created on Tue Dec 28 13:39:27 2021
 
 import os
 
-def prep_text(text_dir, keywords:[]) -> dict:
+def load_text(text_dir, keywords:[]) -> dict:
     """Loads text data from the text directory, and only keeps sentences associated
         with a key word. 
         
@@ -28,4 +28,18 @@ def prep_text(text_dir, keywords:[]) -> dict:
                     sentences[kw].append(line)
                     break # no need to continue, we found a matching line of text
     return sentences
+
+def cut_sentence(sentence:str, keyword:str, ratio:float = 0.05) -> str:
+    """ Cut the sentence to maintain the ratio : count(keyword) / word_count(sentence)
     
+    The default ratio is 1 key word for every 20 words.
+    
+    RETURNS
+        The cut sentence as a string, if the sentence has a ratio of number of keywords to total words 
+        that is greater than the given ratio, the returned sentence will be exactly at the given ratio. 
+    """
+    pass
+
+def resample_file(audio_path:str, sample_rate:int = 16000, pcm_rate:str = "PCM_16" ) -> None:
+    """ Resample given audio file with default sample rate of 16k hz and default PCM_16 """
+    pass

@@ -10,7 +10,7 @@ from settings import audio_dir
 from settings import text_dir
 from settings import keyword_file
 from settings import out_file
-from load_data import prep_text
+from data_processing import load_text
 
 import os
 import numpy as np
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         keywords = file.read().splitlines()
     
     # Load and sort text data into a dictionary {keyword:[text1,text2,. . .]}
-    sentences = prep_text(text_dir, keywords)
+    sentences = load_text(text_dir, keywords)
     
     # Print stats, pick a random selection from each list
     for k, v in sentences.items():
