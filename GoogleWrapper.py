@@ -93,4 +93,4 @@ class GoogleWrapper(APIWrapper):
         except:
             raise Exception("Could not save file " + audio_file + "\n")
 
-        return audio_file, os.path.getsize(audio_file)
+        return audio_file, os.path.getsize(audio_path)
