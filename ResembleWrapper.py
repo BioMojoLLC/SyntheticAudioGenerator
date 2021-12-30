@@ -5,6 +5,7 @@ Created on Tue Dec 28 12:49:46 2021
 @author: Ryan Hurlbut
 """
 from settings import resemble_api_token
+
 from APIWrapper import APIWrapper
 
 import requests
@@ -14,7 +15,7 @@ import os
 
 class ResembleWrapper(APIWrapper):
     def __init__(self):
-        self.voices = ['584fae8e', 'aaron', 'aiden', 'scarlet', 'sophia', 'elijah']
+        self.voices = ['aaron']#, '584fae8e', 'aiden', 'scarlet', 'sophia', 'elijah']
         self.service_name = 'Resemble'
         self.__authenticate()
         self.__new_project()

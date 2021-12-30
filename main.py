@@ -10,6 +10,7 @@ from settings import audio_dir
 from settings import text_dir
 from settings import keyword_file
 from settings import out_file
+
 from data_processing import load_text
 
 import os
@@ -31,7 +32,7 @@ def bytes_to_mins(byte_count : int) -> float:
 
 if __name__ == '__main__':
     sentences_per_term = 10
-    minutes_per_term = .1
+    minutes_per_term = 3
     
     with open(keyword_file, 'r') as file:
         keywords = file.read().splitlines()

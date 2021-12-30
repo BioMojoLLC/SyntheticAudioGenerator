@@ -5,7 +5,8 @@ Created on Tue Dec 28 12:49:35 2021
 @author: Ryan Hurlbut
 @author: Jacob Bream
 """
-
+from settings import replica_username
+from settings import replica_password
 import requests
 import os, os.path
 import librosa
@@ -26,8 +27,10 @@ class ReplicaWrapper(APIWrapper):
 
     def __authenticate(self):
         print("Enter Replica account information")
-        user_id = input("username: ")
-        password = input("password: ")
+        user_id = replica_username
+        password = replica_password
+        # user_id = input("username: ")
+        # password = input("password: ")
         print()
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
