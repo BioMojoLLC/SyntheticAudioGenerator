@@ -6,86 +6,45 @@ Created on Tue Dec 28 12:49:35 2021
 @author: Jacob Bream
 """
 
-import requests
 import random
 import os, os.path
 from google.cloud import texttospeech
 
-from .APIWrapper import APIWrapper
+from APIWrapper import APIWrapper
 
 
 class GoogleWrapper(APIWrapper):
-    client = texttospeech.TextToSpeechClient()
+    client = None
 
     def __init__(self):
-        self.service_name = "Google Cloud Speech to Text"
-        self.__get_voices()
-        # self.voices = [
-        #     "en-US-Wavenet-A",
-        #     "en-US-Wavenet-B",
-        #     "en-US-Wavenet-C",
-        #     "en-US-Wavenet-D",
-        #     "en-US-Wavenet-E",
-        #     "en-US-Wavenet-F",
-        #     "en-US-Wavenet-G",
-        #     "en-US-Wavenet-H",
-        #     "en-US-Wavenet-I",
-        #     "en-US-Wavenet-J",
-        # ]
-        # if self.authenticate() and self.get_voices():
-        #     print("Replica initialization successful\n")
-        # else:
-        #     raise Exception("Replica failed to initialize\n")
-
-    def authenticate(self):
-        print("Enter Replica account information")
-        user_id = input("username: ")
-        password = input("password: ")
-        print()
-
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        payload = "client_id=" + user_id + "&secret=" + password
-
-        # send auth request
-        r = requests.post(
-            "https://api.replicastudios.com/auth", headers=headers, data=payload
-        )
-
-        failed_attempts = 0
-        while (r.status_code == 401 or r.status_code == 403) and failed_attempts < 3:
-            failed_attempts += 1
-            print("Invalid credentials, try again")
-            user_id = input("username: ")
-            password = input("password: ")
-            print()
-            # send auth request
-            r = requests.post(
-                "https://api.replicastudios.com/auth", headers=headers, data=payload
-            )
-
-        if failed_attempts == 3:
-            print("Could not vaildate Replica account")
-            return False
-
-        if r.status_code != 200:
-            print(
-                "Error authorizing Replica account - "
-                + str(r.status_code)
-                + " "
-                + r.reason
-            )
-            return False
+        self.service_name = "Google Cloud Text to Speech"
+        if self.__authenticate() and self.__get_voices():
+            print("Google Cloud Text to Speech initialization successful\n")
         else:
-            auth_token = r.json()["access_token"]
-            refresh_token = r.json()["refresh_token"]
-            print("Replica auth_token: " + auth_token)
-            print("Replica refresh_token: " + refresh_token + "\n")
-            self.api_token = auth_token
+            raise Exception("Google Cloud Text to Speech failed to initialize\n")
+
+    def __authenticate(self):
+        os.environ[
+            "GOOGLE_APPLICATION_CREDENTIALS"
+        ] = "C:\\Users\\jrbre\\Documents\\Biomojo\\SyntheticAudioGenerator\\decent-blade-336618-e8742853d3d1.json"
+        try:
+            self.client = texttospeech.TextToSpeechClient()
             return True
+        except:
+            print("Could not create Google client")
+            return False
 
     def __get_voices(self):
-        self.voices = self.client.list_voices()
-        print(self.voices)
+        voices_dict = self.client.list_voices()
+        try:
+            for voice in voices_dict.voices:
+                for language_code in voice.language_codes:
+                    if language_code == "en-GB" or language_code == "en-US":
+                        self.voices.append(voice.name)
+            return True
+        except:
+            print("Error getting Google voices")
+            return False
 
     def generate_audio(self, output_folder, sentence, voice, clip_id):
 
@@ -116,9 +75,7 @@ class GoogleWrapper(APIWrapper):
         )
 
         try:
-            filename, filesize = self.__save_audio(
-                output_folder, res, self.voices_map[voice], clip_id
-            )
+            filename, filesize = self.__save_audio(output_folder, res, voice, clip_id)
             return res, filename, filesize
         except Exception as e:
             print(str(e))
@@ -134,7 +91,5 @@ class GoogleWrapper(APIWrapper):
                 print("Saved to file: " + audio_file + "\n")
         except:
             raise Exception("Could not save file " + audio_file + "\n")
-
-        print("Saved to file: " + audio_file + "\n")
 
         return audio_file, os.path.getsize(audio_file)

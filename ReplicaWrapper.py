@@ -6,14 +6,13 @@ Created on Tue Dec 28 12:49:35 2021
 @author: Jacob Bream
 """
 from settings import replica_username
-from settings import replica_pw
+from settings import replica_password
 
 import requests
 import os, os.path
-import librosa
-import soundfile as sf
 
 from APIWrapper import APIWrapper
+import data_processing as dp
 
 
 class ReplicaWrapper(APIWrapper):
@@ -27,12 +26,8 @@ class ReplicaWrapper(APIWrapper):
             raise Exception("Replica failed to initialize\n")
 
     def __authenticate(self):
-        print("Enter Replica account information")
         user_id = replica_username
-        password = replica_pw
-        # user_id = input("username: ")
-        # password = input("password: ")
-        print()
+        password = replica_password
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         payload = "client_id=" + user_id + "&secret=" + password
@@ -69,8 +64,7 @@ class ReplicaWrapper(APIWrapper):
         else:
             auth_token = r.json()["access_token"]
             refresh_token = r.json()["refresh_token"]
-            print("Replica auth_token: " + auth_token)
-            print("Replica refresh_token: " + refresh_token + "\n")
+            print("Replica successfully authorized")
             self.api_token = auth_token
             return True
 
@@ -88,7 +82,7 @@ class ReplicaWrapper(APIWrapper):
             self.voices.append(voice["uuid"])
             self.voices_map[voice["uuid"]] = voice["name"]
 
-        print("Got " + str(len(self.voices)) + " voices from Replica\n")
+        print("Got " + str(len(self.voices)) + " voices from Replica")
         return True
 
     def generate_audio(self, output_folder, sentence, voice, clip_id):
@@ -158,13 +152,7 @@ class ReplicaWrapper(APIWrapper):
             except:
                 raise Exception("Could not save file " + audio_file + "\n")
 
-            # resample audio to 16k hz
-            try:
-                x, sr = librosa.load(audio_file, sr=22050)
-                y = librosa.resample(x, 22050, 16000)
-                sf.write(audio_file, y, 16000, subtype="PCM_16")
-            except:
-                print("Could not resample audio file " + audio_file)
+            dp.resample_file(audio_file, 22050, 16000, "PCM_16")
 
             print("Saved to file: " + audio_file + "\n")
 
