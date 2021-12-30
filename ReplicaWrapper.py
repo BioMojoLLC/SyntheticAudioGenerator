@@ -78,6 +78,8 @@ class ReplicaWrapper(APIWrapper):
                 "Error getting Replica voices - " + str(r.status_code) + " " + r.reason
             )
             return False
+        self.voices = []
+        self.voices_map = {}
         for voice in r.json():
             self.voices.append(voice["uuid"])
             self.voices_map[voice["uuid"]] = voice["name"]
