@@ -6,14 +6,13 @@ Created on Tue Dec 28 12:49:35 2021
 @author: Jacob Bream
 """
 from settings import replica_username
-from settings import replica_pw
+from settings import replica_password
 
 import requests
 import os, os.path
-import librosa
-import soundfile as sf
 
 from APIWrapper import APIWrapper
+import data_processing as dp
 
 
 class ReplicaWrapper(APIWrapper):
@@ -27,12 +26,8 @@ class ReplicaWrapper(APIWrapper):
             raise Exception("Replica failed to initialize\n")
 
     def __authenticate(self):
-        print("Enter Replica account information")
         user_id = replica_username
-        password = replica_pw
-        # user_id = input("username: ")
-        # password = input("password: ")
-        print()
+        password = replica_password
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         payload = "client_id=" + user_id + "&secret=" + password
@@ -69,8 +64,7 @@ class ReplicaWrapper(APIWrapper):
         else:
             auth_token = r.json()["access_token"]
             refresh_token = r.json()["refresh_token"]
-            print("Replica auth_token: " + auth_token)
-            print("Replica refresh_token: " + refresh_token + "\n")
+            print("Replica successfully authorized")
             self.api_token = auth_token
             return True
 
@@ -84,11 +78,13 @@ class ReplicaWrapper(APIWrapper):
                 "Error getting Replica voices - " + str(r.status_code) + " " + r.reason
             )
             return False
+        self.voices = []
+        self.voices_map = {}
         for voice in r.json():
             self.voices.append(voice["uuid"])
             self.voices_map[voice["uuid"]] = voice["name"]
 
-        print("Got " + str(len(self.voices)) + " voices from Replica\n")
+        print("Got " + str(len(self.voices)) + " voices from Replica")
         return True
 
     def generate_audio(self, output_folder, sentence, voice, clip_id):
@@ -139,7 +135,8 @@ class ReplicaWrapper(APIWrapper):
                 return 400, None, None
 
     def __save_audio(self, output_folder, res, voice, clip_id):
-        audio_file = output_folder + "replica_" + voice + "_" + str(clip_id) + ".wav"
+        audio_file = "replica_" + voice + "_" + str(clip_id) + ".wav"
+        audio_path = output_folder + audio_file
         link = res["url"]
 
         # download audio file in 22050 hz
@@ -154,21 +151,15 @@ class ReplicaWrapper(APIWrapper):
         else:
             # save audio file
             try:
-                open(audio_file, "wb").write(resp.content)
+                open(audio_path, "wb").write(resp.content)
             except:
                 raise Exception("Could not save file " + audio_file + "\n")
 
-            # resample audio to 16k hz
-            try:
-                x, sr = librosa.load(audio_file, sr=22050)
-                y = librosa.resample(x, 22050, 16000)
-                sf.write(audio_file, y, 16000, subtype="PCM_16")
-            except:
-                print("Could not resample audio file " + audio_file)
+            dp.resample_file(audio_path, 22050, 16000, "PCM_16")
 
             print("Saved to file: " + audio_file + "\n")
 
             return audio_file, os.path.getsize(audio_file)
 
     def cleanup(self):
-        print("Cleaned", self.servce_name)
+        print("Cleaned", self.service_name)
