@@ -3,6 +3,7 @@
 Created on Tue Dec 28 12:49:46 2021
 
 @author: Ryan Hurlbut
+@author: Jacob Bream
 """
 from settings import resemble_api_token
 
@@ -26,7 +27,7 @@ class ResembleWrapper(APIWrapper):
             raise Exception("Resemble failed to initialize\n")
 
     def __authenticate(self):
-        self.auth_token = resemble_api_token
+        self.api_token = resemble_api_token
         return True
 
     def __new_project(self):
@@ -36,7 +37,7 @@ class ResembleWrapper(APIWrapper):
         print(name)
         url = "https://app.resemble.ai/api/v1/projects"
         headers = {
-            "Authorization": "Token token=" + self.auth_token,
+            "Authorization": "Token token=" + self.api_token,
             "Content-Type": "application/json",
         }
         data = {"name": name, "description": name}
@@ -62,7 +63,7 @@ class ResembleWrapper(APIWrapper):
                 f"https://app.resemble.ai/api/v1/projects/{self.project_uuid}/clips"
             )
             post_headers = {
-                "Authorization": f"Bearer {self.auth_token}",
+                "Authorization": f"Bearer {self.api_token}",
                 "Content-Type": "application/json",
             }
             data = {
@@ -94,7 +95,7 @@ class ResembleWrapper(APIWrapper):
             clip_uuid = post_response.json()["id"]
             get_url = f"https://app.resemble.ai/api/v1/projects/{self.project_uuid}/clips/{clip_uuid}"
             get_headers = {
-                "Authorization": f"Token token={self.auth_token}",
+                "Authorization": f"Token token={self.api_token}",
                 "Content-Type": "application/json",
             }
             get_response = requests.get(get_url, headers=get_headers)
@@ -138,7 +139,7 @@ class ResembleWrapper(APIWrapper):
     def cleanup(self):
         delete_url = f"https://app.resemble.ai/api/v1/projects/{self.project_uuid}"
         headers = {
-            "Authorization": "Token token=" + self.auth_token,
+            "Authorization": "Token token=" + self.api_token,
             "Content-Type": "application/json",
         }
         delete_res = requests.delete(delete_url, headers=headers)

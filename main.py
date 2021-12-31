@@ -3,6 +3,7 @@
 Created on Tue Dec 28 12:48:38 2021
 
 @author: Ryan Hurlbut
+@author: Jacob Bream
 """
 
 """ These will end up being CL options"""
@@ -19,6 +20,7 @@ import csv
 
 from ResembleWrapper import ResembleWrapper
 from ReplicaWrapper import ReplicaWrapper
+from GoogleWrapper import GoogleWrapper
 
 def _bytes_to_mins(byte_count : int) -> float:
     # One minute of 16bit prec, sr 16k, mono channel wav file = 1950000 bytes
@@ -42,19 +44,19 @@ if __name__ == '__main__':
     sentences = import_text_data(text_dir, keywords)
     
     if not os.path.exists(audio_dir):
-        print("New directory created for audio:")
-        print(audio_dir)
         os.makedirs(audio_dir)
+        print("New directory created for audio:")
     else:
         print("Using existing directory:")
-        print(audio_dir)
     
-    print()
-    print("Connecting to APIs")
+    print(audio_dir)
+    
+    print("\nConnecting to APIs")
     # For now APIs are hardcoded in. 
     apis = []
     apis.append(ResembleWrapper())
     apis.append(ReplicaWrapper())
+    # apis.append(GoogleWrapper())
     
     clip_id = _get_next_recording_number(audio_dir)
     print("Starting generator at id: ", clip_id)
