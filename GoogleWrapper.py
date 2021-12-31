@@ -98,8 +98,7 @@ class GoogleWrapper(APIWrapper):
         try:
             with open(audio_path, "wb") as out:
                 out.write(res.audio_content)
-            data, samplerate = sf.read(audio_path)
-            dp.resample_file(audio_path, samplerate, 16000, "PCM_16")
+            dp.resample_file(audio_path, 16000, "PCM_16")
         except:
             raise Exception("Could not save file " + audio_file + "\n")
 

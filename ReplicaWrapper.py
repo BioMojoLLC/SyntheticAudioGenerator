@@ -17,6 +17,7 @@ import pronouncing
 from APIWrapper import APIWrapper
 import data_processing as dp
 
+
 class ReplicaWrapper(APIWrapper):
     voices_map = {}  # maps voice uuid's to speaker names
 
@@ -89,26 +90,33 @@ class ReplicaWrapper(APIWrapper):
         print("Got " + str(len(self.voices)) + " voices from Replica")
         return True
 
-    def __setup_phonetics(self) ->bool:
+    def __setup_phonetics(self) -> bool:
         self.phonetic_dict = {}
-        with open(keyword_file, 'r') as file:
+        with open(keyword_file, "r") as file:
             keywords = file.read().splitlines()
 
         for kw in keywords:
-            phones = pronouncing.phones_for_word(kw) # returns a list of pronunciations
-            phones = [''.join([i for i in phone if not i.isdigit() and not i.isspace()]).lower() for phone in phones] # remove pesky digits
-            phones = set(phones) # remove duplicates
-            phones = list(phones)[:5] # Keep only 5? I shouldn't be using magic numbers like this!!
+            phones = pronouncing.phones_for_word(kw)  # returns a list of pronunciations
+            phones = [
+                "".join(
+                    [i for i in phone if not i.isdigit() and not i.isspace()]
+                ).lower()
+                for phone in phones
+            ]  # remove pesky digits
+            phones = set(phones)  # remove duplicates
+            phones = list(phones)[
+                :5
+            ]  # Keep only 5? I shouldn't be using magic numbers like this!!
             self.phonetic_dict[kw] = phones
 
         print("Phonetic dictionary constructed")
         return True
-    
+
     def generate_audio(self, output_folder, sentence, voice, clip_id):
 
         # Simple conversion of specific terms
-        sentence = dp.get_phonetic_sentence(sentence, self.phonetic_dict) 
-        
+        sentence = dp.get_phonetic_sentence(sentence, self.phonetic_dict)
+
         headers = {"Authorization": "Bearer " + self.api_token}
         # send audio generation request to replica
         r = requests.get(
@@ -175,7 +183,7 @@ class ReplicaWrapper(APIWrapper):
             except:
                 raise Exception("Could not save file " + audio_file + "\n")
 
-            dp.resample_file(audio_path, 22050, 16000, "PCM_16")
+            dp.resample_file(audio_path, 16000, "PCM_16")
 
             print("Successfully created: " + audio_file)
 
