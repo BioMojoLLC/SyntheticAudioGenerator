@@ -10,11 +10,13 @@ import librosa
 import soundfile as sf
 import re
 import random
+import numpy as np
 
-def load_text(text_dir, keywords: []) -> dict:
+def import_text_data(text_dir, keywords: [], num_to_keep:int = 20) -> dict:
     """Loads text data from the text directory, and only keeps sentences associated
     with a key word.
 
+    Defaults to keep only 10 sentences per term.
     RETURNS
         A dictionary with keywords as the key, and a list of sentences as the value
     """
@@ -23,7 +25,7 @@ def load_text(text_dir, keywords: []) -> dict:
         filename for filename in os.listdir(text_dir) if filename.endswith(".txt")
     ]
     for filename in text_files:
-        print("Reading ---", filename)
+        print("Reading --->", filename)
         contents = []
         with open(text_dir + filename, "r") as file:
             contents = [line.strip() for line in file.readlines()]
@@ -33,6 +35,17 @@ def load_text(text_dir, keywords: []) -> dict:
                 if " " + kw + " " in line:
                     sentences[kw].append(line)
                     break  # no need to continue, we found a matching line of text
+    
+    # Print stats, pick a random selection from each list
+    for k, v in sentences.items():
+        n = len(v)
+        print("Sentences found for", k, ":", n)
+        v = np.random.choice( v, min(num_to_keep, n) , replace=False)
+        v = [cut_sentence(s, k) for s in v]
+        sentences[k] = v
+        
+    print("Only using up to ", num_to_keep, "sentences per term")
+    print()
     return sentences
 
 
@@ -73,8 +86,11 @@ def cut_sentence(input_string: str, keyword: str, target_ratio: float = 1/17) ->
     
 def get_phonetic_sentence(sentence:str, phonetic_dict: dict) ->str:
     for w, p_list in phonetic_dict.items():
-        p = random.choice(p_list)
-        sentence = sentence.replace(w, p)
+        if p_list:
+            p = random.choice(p_list)
+            sentence = sentence.replace(w, p)
+        else:
+            print("Term:", w, "has no phonetic version")
         
     return sentence
 

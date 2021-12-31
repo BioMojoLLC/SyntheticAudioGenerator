@@ -177,7 +177,7 @@ class ReplicaWrapper(APIWrapper):
 
             dp.resample_file(audio_path, 22050, 16000, "PCM_16")
 
-            print("Saved to file: " + audio_file + "\n")
+            print("Successfully created: " + audio_file)
 
             return audio_file, os.path.getsize(audio_path)
 

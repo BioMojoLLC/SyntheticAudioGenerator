@@ -13,16 +13,20 @@ import datetime
 import time
 import os
 
+import data_processing as dp
+
 class ResembleWrapper(APIWrapper):
     def __init__(self):
-        self.voices = ['aaron', '584fae8e']#, 'aiden', 'scarlet', 'sophia', 'elijah']
+        self.voices = ['aaron', '584fae8e', 'aiden']#, 'scarlet', 'sophia', 'elijah']
         self.service_name = 'Resemble'
-        self.__authenticate()
-        self.__new_project()
-        print("Resemble initialization successful\n")
+        if self.__authenticate() and self.__new_project():    
+            print("Resemble initialization successful\n")
+        else:
+            raise Exception("Resemble failed to initialize\n")
 
     def __authenticate(self):
         self.auth_token = resemble_api_token
+        return True
         
     def __new_project(self):
         name = "Auto-Generated Project on " + datetime.datetime.now().strftime("%m/%d/%Y, at %H:%M")
@@ -41,6 +45,7 @@ class ResembleWrapper(APIWrapper):
         if response.status_code == 200:
             self.project_uuid = response.json()["uuid"]
             print("Resemble project uuid:", self.project_uuid)
+            return True
         else:
             raise Exception("Unable to make a new project for Resemble")
                 
@@ -64,7 +69,6 @@ class ResembleWrapper(APIWrapper):
             post_response = requests.post(post_url, headers=post_headers, json=data)
             status = post_response.status_code
             if (status == 200):
-                print("Created", clip_name)
                 break
             elif (status == 429):
                 print("Resemble timed you out, waiting 2 seconds")
@@ -100,11 +104,15 @@ class ResembleWrapper(APIWrapper):
         link = get_response.json()['link'] 
         resp = requests.get(link, allow_redirects=True)
         status = resp.status_code
+        
         if resp.status_code == 200:
-            clip_path = os.path.join(audio_dir, clip_name)
-            open(clip_path, 'wb').write(resp.content)
-            size = int(resp.headers['content-length'])
-            print("Saved", clip_name + "\n")
+
+            audio_path = os.path.join(audio_dir, clip_name)
+            open(audio_path, 'wb').write(resp.content)
+            dp.resample_file(audio_path, 44000, 16000, "PCM_16")
+            size = os.path.getsize(audio_path)
+
+            print("Successfully created:", clip_name)
             return status, clip_name, size
         else:
             print("Unable to download from link:", link)
