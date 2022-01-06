@@ -29,7 +29,7 @@ def import_text_data(text_dir, keywords: [], num_to_keep: int = 20) -> dict:
     for filename in text_files:
         print("Reading --->", filename)
         contents = []
-        with open(text_dir + filename, "r") as file:
+        with open(os.path.join(text_dir, filename), "r") as file:
             contents = [line.strip() for line in file.readlines()]
 
         for line in contents:

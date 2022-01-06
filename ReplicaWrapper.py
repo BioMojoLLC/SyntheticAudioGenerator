@@ -190,4 +190,4 @@ class ReplicaWrapper(APIWrapper):
             return audio_file, os.path.getsize(audio_path)
 
     def cleanup(self):
-        print("Cleaned", self.service_name)
+        pass
