@@ -91,7 +91,7 @@ class GoogleWrapper(APIWrapper):
             return 400, None, None
 
     def __save_audio(self, output_folder, res, voice, clip_id):
-        audio_file = "replica_" + voice + "_" + str(clip_id) + ".wav"
+        audio_file = "google_" + voice + "_" + str(clip_id) + ".wav"
         audio_path = output_folder + audio_file
 
         # save audio file

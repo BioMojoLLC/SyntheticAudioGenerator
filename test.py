@@ -1,6 +1,6 @@
+from AmazonWrapper import AmazonWrapper
 from GoogleWrapper import GoogleWrapper
-
-# from ReplicaWrapper import ReplicaWrapper
+from ReplicaWrapper import ReplicaWrapper
 
 
 # replica = ReplicaWrapper()
@@ -11,10 +11,15 @@ from GoogleWrapper import GoogleWrapper
 #     0,
 # )
 
-google = GoogleWrapper()
-res, filename, filesize = google.generate_audio(
-    "../audio/",
-    "Hi my name is Jacob and I have crippling eczema",
-    "en-US-Wavenet-A",
-    0,
+# google = GoogleWrapper()
+# res, filename, filesize = google.generate_audio(
+#     "../audio/",
+#     "Hi my name is Jacob and I have crippling eczema",
+#     "en-US-Wavenet-A",
+#     0,
+# )
+
+amazon = AmazonWrapper()
+res, filename, filesize = amazon.generate_audio(
+    "../audio/", "Hi my name is Jacob and I have crippling eczema", "Joanna", 0
 )
