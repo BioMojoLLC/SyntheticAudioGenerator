@@ -1,7 +1,10 @@
 settings.py
 *.csv
-*.txt
 *.wav
+
+*.txt
+!requirements.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

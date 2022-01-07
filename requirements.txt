@@ -1,0 +1,9 @@
+librosa
+numpy
+soundfile
+google.cloud
+boto3
+botocore
+contextlib
+wave
+pronouncing
