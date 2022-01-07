@@ -15,12 +15,14 @@ import numpy as np
 
 
 def import_text_data(text_dir, keywords: [], num_to_keep: int = 20) -> dict:
-    """Loads text data from the text directory, and only keeps sentences associated
+    """
+    Loads text data from the text directory, and only keeps sentences associated
     with a key word.
 
     Defaults to keep only 10 sentences per term.
-    RETURNS
-        A dictionary with keywords as the key, and a list of sentences as the value
+    
+    Returns
+        dict: keywords as the key, and a list of sentences as the value
     """
     sentences = {kw: [] for kw in keywords}
     text_files = [
@@ -56,19 +58,17 @@ def cut_sentence(input_string: str, keyword: str, target_ratio: float = 1 / 17) 
 
     This function is case sensitive!
 
-    input_string
-        the input string to cut down the wordcount of
+    Parameters
+        input_string: The string for which to cut down the wordcount ratio
 
-    keyword
-        the word to leave buffer words in front of and behind
+        keyword: The word to leave buffer words in front of and behind
 
-    target_ratio
-        must be between 0 and 1, the ratio used to determine how many words to keep, related to how many
-        ocurrances of the keyword there are
+        target_ratio: Must be a float between 0 and 1. This is the ratio used to determine 
+                       how many words to keep, related to how many ocurrances of the keyword
+                       there are
 
-    RETURNS
-        The cut sentence as a string. If the sentence is already at the target ratio,
-        the unchanged input is returned
+    Returns
+        string: The cut sentence
     """
     s = input_string.split(" ")
     l = len(s)
@@ -103,7 +103,9 @@ def resample_file(
     new_sample_rate: int = 16000,
     pcm_rate: str = "PCM_16",
 ) -> None:
-    """Resample given audio file with default sample rate of 16k hz and default PCM_16"""
+    """
+    Resample given audio file with default sample rate of 16k hz and default PCM_16
+    """
     # resample audio to 16k hz
     try:
         data, old_sample_rate = sf.read(audio_path)

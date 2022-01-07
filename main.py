@@ -79,7 +79,7 @@ def main():
     clip_id = _get_next_recording_number(args.audio_dir)
     print("Starting generator at id: ", clip_id)
 
-    # Convert terms, apis, and sentences for each term into queues.
+    # Convert terms, apis, and sentences into queues.
     term_q = deque(keywords)
     api_q = deque(apis)
     for k, v in sentences.items():
@@ -89,15 +89,14 @@ def main():
     term_bytes = {kw:0 for kw in keywords}
     
     try:
-        # While we haven't made all of our target data, AND we still have an api to use
         while len(term_q) and len(api_q):
             api = api_q.popleft()
             api_q.append(api)
             print("\nSwitching to api:", api.service_name)
             
             for voice in api.voices:
-                # Cut the loop if we hit data targets for all terms.
                 if not len(term_q):
+                    # Cut the loop if we hit data targets for all terms
                     break
     
                 term = term_q.popleft()
@@ -118,13 +117,12 @@ def main():
                     print("Current API queue:", [a.service_name for a in api_q], len(api_q))
                     break
     
-                # Remove the term if we have hit the target for the term
+                # Remove the term if we have hit the quantity target for the term
                 if _bytes_to_mins(term_bytes[term]) >= args.mins_per_term:
                     print("\nRemoving \"", term.strip(), "\" from term queue")
                     term_q.remove(term)
                 
-            # Randomly offset the terms, after using an api. In the long run, 
-            # this will ensure each term does not get used by the same api repeatedly. 
+            # Sometimes offset the terms after using an api. 
             if random.getrandbits(1) and len(term_q):
                 term_q.append(term_q.popleft())    
         
@@ -147,6 +145,5 @@ def main():
         api.cleanup()
         print("Cleaned", api.service_name)
         
-
 if __name__ == '__main__':
     main()
