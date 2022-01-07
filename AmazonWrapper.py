@@ -9,13 +9,10 @@ Created on Tue Dec 28 12:49:35 2021
 import os, os.path
 from settings import amazon_access_key_id
 from settings import amazon_secret_access_key
-import soundfile as sf
-import data_processing as dp
 from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 import wave
-import requests
 
 from APIWrapper import APIWrapper
 
@@ -58,6 +55,7 @@ class AmazonWrapper(APIWrapper):
                     self.voices.append(voice["Id"])
         except:
             print("Error getting Amazon voices")
+            return False
 
         print("Got " + str(len(self.voices)) + " voices from Amazon")
         print(self.voices)
@@ -76,7 +74,7 @@ class AmazonWrapper(APIWrapper):
                 )
                 return 200, filename, filesize
             except Exception as e:
-                print("Exception while saving audio file:", res, str(e))
+                print("Exception while saving audio file: ", str(e))
                 return 400, None, None
         except (BotoCoreError, ClientError) as error:
             print(error)
@@ -107,3 +105,6 @@ class AmazonWrapper(APIWrapper):
         print("Successfully created: " + audio_file + ".wav")
 
         return audio_file, os.path.getsize(audio_path_wav)
+
+    def cleanup(self):
+        pass

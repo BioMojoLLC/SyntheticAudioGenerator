@@ -29,3 +29,10 @@ class APIWrapper:
 
     def generate_audio(self, output_folder, sentence, voice, clip_id):
         pass
+
+    """Cleans the API service of anything left over from the generation.
+        It's possible and even likely that an API won't need this method to do anything.
+    """
+
+    def cleanup(self):
+        pass
