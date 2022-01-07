@@ -1,7 +1,9 @@
 librosa
 numpy
 soundfile
-google.cloud
+google-cloud-texttospeech
+google-api-python-client
+google-cloud-storage
 boto3
 botocore
 contextlib
