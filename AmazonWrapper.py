@@ -105,6 +105,3 @@ class AmazonWrapper(APIWrapper):
         print("Successfully created: " + audio_file + ".wav")
 
         return audio_file, os.path.getsize(audio_path_wav)
-
-    def cleanup(self):
-        pass
