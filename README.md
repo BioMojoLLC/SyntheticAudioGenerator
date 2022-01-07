@@ -1,5 +1,5 @@
 # SyntheticAudioGenerator
-SyntheticAudioGenerator is a simple script created for BiomojoLLC to create vast quantities of audio training data using a variable length array of audio generating services, including Resemble.ai, Replica Studios, Google API, and an Amazon service. 
+SyntheticAudioGenerator is a simple script created for BiomojoLLC to create vast quantities of audio training data using a variable length array of audio generating services, including Resemble.ai, Replica Studios, Google API, and the Amazon service. 
 
 
 ```bash 
