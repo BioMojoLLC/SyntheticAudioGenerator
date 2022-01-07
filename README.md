@@ -12,7 +12,6 @@ git clone https://github.com/BioMojoLLC/SyntheticAudioGenerator.git
 3) Create a directory with any number of .txt files containing your input sentences.
 4) Create a keywords.txt file, with each key word on a new line. These words are what the program will be creating data for.
 5) Optionally create a directory for audio to be saved to. 
-6) Run
 
 ### Virtual Environment
 ```bash
