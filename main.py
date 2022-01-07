@@ -29,15 +29,15 @@ def _get_args():
     
     parser.add_argument('-a', '--audio_dir', type=os.path.abspath)
     parser.add_argument('-t', '--text_dir', type=os.path.abspath)
-    parser.add_argument('-k', '--keyword_file', type=os.path.abspath)   
-    parser.add_argument('-m', '--mins', type=int)
+    parser.add_argument('-k', '--keywords', type=os.path.abspath)   
+    parser.add_argument('-m', '--mins_per_term', type=int)
     
     args = parser.parse_args()
     
     if not os.path.exists(args.text_dir):
         raise SystemExit( f'\n{args.text_dir} \ndoes not exist')
-    if not os.path.exists(args.keyword_file):
-        raise SystemExit( f'\n{args.keyword_file} \ndoes not exist')
+    if not os.path.exists(args.keywords):
+        raise SystemExit( f'\n{args.keywords} \ndoes not exist')
 
     return args
 
@@ -55,7 +55,7 @@ def _get_next_recording_number(directory:str) ->int:
 def main():
     args = _get_args()
     
-    with open(args.keyword_file, 'r') as file:
+    with open(args.keywords, 'r') as file:
         keywords = file.read().splitlines()
     
     # Load and sort text data into a dictionary {keyword:[text1,text2,. . .]}
@@ -119,7 +119,7 @@ def main():
                     break
     
                 # Remove the term if we have hit the target for the term
-                if _bytes_to_mins(term_bytes[term]) >= args.mins:
+                if _bytes_to_mins(term_bytes[term]) >= args.mins_per_term:
                     print("\nRemoving \"", term.strip(), "\" from term queue")
                     term_q.remove(term)
                 
