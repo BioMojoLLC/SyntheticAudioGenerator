@@ -8,7 +8,7 @@ git clone https://github.com/BioMojoLLC/SyntheticAudioGenerator.git
 
 ### Setup
 1) Copy settings_template.py into settings.py.
-2) Open up settings.py and fill out all of the fields with your user information for each service.
+2) Open up settings.py and fill out all of the fields with your user information for each service. (Currently must do for all services)
 3) Create a directory with any number of .txt files containing your input sentences.
 4) Create a keywords.txt file, with each key word on a new line. These words are what the program will be creating data for.
 5) Optionally create a directory for audio to be saved to. 
