@@ -7,8 +7,8 @@ git clone https://github.com/BioMojoLLC/SyntheticAudioGenerator.git
 ```
 
 ```diff 
-+ ### Setup
-+ ```
+### + Setup
+```
 1) Copy settings_template.py into settings.py.
 2) Open up settings.py and fill out all of the fields with your user information for each service.
 3) Create a directory with any number of .txt files containing your input sentences.
