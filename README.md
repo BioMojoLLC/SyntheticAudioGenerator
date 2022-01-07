@@ -14,7 +14,7 @@ git clone https://github.com/BioMojoLLC/SyntheticAudioGenerator.git
 5) Optionally create a directory for audio to be saved to. 
 6) Run
 
-### Setting up your virtual environment
+### Virtual Environment
 ```bash
 apt-get update
 apt-get install python3-venv
