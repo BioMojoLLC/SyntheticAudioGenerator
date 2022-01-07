@@ -30,3 +30,7 @@ All file/folder paths are relative to your **working directory**, not the main.p
 python main.py --text_dir <path/to/text/dir> --audio_dir <path/to/output/dir> --keywords <path/to/keyword.txt> --mins_per_term <integer> 
 ```
 
+There is also support for short options.
+```bash
+python main.py -t <path/to/text/dir> -a <path/to/output/dir> -k <path/to/keyword.txt> -m <integer> 
+
